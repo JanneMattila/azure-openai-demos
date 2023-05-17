@@ -1,7 +1,18 @@
+using WebApp.Models;
+using WebApp.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+builder.Services.AddOptions<ChatOptions>()
+    .Configure<IConfiguration>((settings, configuration) =>
+    {
+        configuration.GetSection("Chat").Bind(settings);
+    });
+
+builder.Services.AddSingleton<IChatService, ChatService>();
 
 var app = builder.Build();
 
