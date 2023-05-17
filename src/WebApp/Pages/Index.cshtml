@@ -36,13 +36,13 @@
             return chatBubble;
         }
 
-
         chatInput.addEventListener("keyup", function (event) {
             event.preventDefault();
             if (event.keyCode === 13) {
                 chatInputSubmit.click();
             }
         });
+
         chatInputSubmit.addEventListener("click", function (event) {
             event.preventDefault();
             let chatText = chatInput.value;
@@ -88,7 +88,9 @@
                     const prompt = data.prompts[i];
                     let promptButton = document.createElement("button");
                     promptButton.classList.add("btn");
-                    promptButton.classList.add("btn-light");
+                    promptButton.classList.add("btn-outline-secondary");
+                    promptButton.classList.add("btn-sm");
+                    promptButton.classList.add("chatPromptButton");
                     promptButton.innerText = prompt.title;
                     promptButton.onclick = () => {
                         chatInput.value = "";

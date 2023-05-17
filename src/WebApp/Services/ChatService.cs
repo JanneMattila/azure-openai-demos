@@ -11,7 +11,6 @@ public class ChatService : IChatService
     private readonly ILogger _logger;
     private readonly ChatOptions _options;
     private readonly OpenAIClient _client;
-    private List<ChatMessage> _chats = new List<ChatMessage>();
     private ChatCompletionsOptions _chatCompletionsOptions;
 
     public ChatService(ILoggerFactory loggerFactory, IOptions<ChatOptions> options)
