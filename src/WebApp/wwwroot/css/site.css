@@ -8,19 +8,28 @@ body {
     height: 100%
 }
 
-.chatArea {
-    height: 100%;
-    min-height: 100%;
+.chatHistory {
     position: relative;
+    /* Firefox */
+    min-height: -moz-calc(100% - 50px);
+    /* WebKit */
+    min-height: -webkit-calc(100% - 50px);
+    /* Opera */
+    min-height: -o-calc(100% - 50px);
+    /* Standard */
+    min-height: calc(100% - 50px);
 }
 
 .chatInputContainer {
-    position: absolute;
+    height: 30px;
+    width: 100%;
+    clear: both;
+    /*position: absolute;*/
+    position: relative;
+    left: 0;
     bottom: 0;
-    padding-top: 12px;
     padding-left: 24px;
     padding-right: 24px;
-    width: 100%;
 }
 
 .chatBubble {
@@ -35,13 +44,13 @@ body {
 
 .chatBubbleUser {
     background: #4682ff;
-    text-align: left;
+    margin-left: auto;
+    text-align: right;
 }
 
 .chatBubbleAI {
-    margin-left: auto;
+    text-align: left;
     background: #a2fb7c;
-    text-align: right;
     color: black;
 }
 

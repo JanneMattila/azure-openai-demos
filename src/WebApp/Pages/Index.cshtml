@@ -4,27 +4,32 @@
     ViewData["Title"] = "Chat";
 }
 
-<div class="text-center" id="chatArea">
+<div class="chatHistory" id="chatHistory"></div>
 
-    <div class="input-group mb-3 chatInputContainer">
-        <input type="text" id="chatInput" class="form-control" placeholder="Type your query here" aria-label="Type your query here" aria-describedby="basic-addon2">
-        <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button" id="chatInputSubmit">Send</button>
-        </div>
+<div class="input-group mb-3 chatInputContainer" id="chatInputWrapper">
+    <input type="text" id="chatInput" class="form-control" placeholder="" aria-label="Type your query here" aria-describedby="basic-addon2">
+    <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button" id="chatInputSubmit">Send</button>
     </div>
 </div>
 
 @section Scripts {
     <script>
+        let charBubbleToRemove = null;
         let chatInput = document.getElementById("chatInput");
+        let chatInputWrapper = document.getElementById("chatInputWrapper");
         let chatInputSubmit = document.getElementById("chatInputSubmit");
+        let chatHistory = document.getElementById("chatHistory");
 
         const createChatBubble = (text, type) => {
             let chatBubble = document.createElement("div");
             chatBubble.classList.add("chatBubble");
             chatBubble.classList.add(type);
             chatBubble.innerText = text;
-            chatArea.appendChild(chatBubble);
+            chatHistory.appendChild(chatBubble);
+
+            chatInputWrapper.scrollIntoView({ behavior: "smooth" });
+            return chatBubble;
         }
 
 
@@ -39,7 +44,7 @@
             let chatText = chatInput.value;
             if (chatInput != "") {
                 createChatBubble(chatText, "chatBubbleUser");
-
+                charBubbleToRemove = createChatBubble("...", "chatBubbleAI");
                 const json = {
                     "text": chatText,
                 };
@@ -55,10 +60,14 @@
                         return response.json();
                     })
                     .then(data => {
+                        chatHistory.removeChild(charBubbleToRemove);
+                        charBubbleToRemove = null;
                         createChatBubble(data.text, "chatBubbleAI");
                     })
                     .catch(error => {
                         console.log(error);
+                        chatHistory.removeChild(charBubbleToRemove);
+                        charBubbleToRemove = null;
                         createChatBubble(error, "chatBubbleError");
                     });
                 chatInput.value = "";
