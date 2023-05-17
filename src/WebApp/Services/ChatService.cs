@@ -33,6 +33,21 @@ public class ChatService : IChatService
         _chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System, _options.Prompt));
     }
 
+    public void SetPrompt(Prompt prompt)
+    {
+        _chatCompletionsOptions.Messages.Clear();
+
+        if (!string.IsNullOrEmpty(prompt.SystemMessage))
+        {
+            _chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System, prompt.SystemMessage));
+        }
+
+        if (!string.IsNullOrEmpty(prompt.UserMessage))
+        {
+            _chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, prompt.UserMessage));
+        }
+    }
+
     public async Task<string> GetResponseAsync(string text)
     {
         if (_options.Disabled)
@@ -44,7 +59,6 @@ public class ChatService : IChatService
         while (_chatCompletionsOptions.Messages.Count > 20) _chatCompletionsOptions.Messages.RemoveAt(0);
 
         _chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, text));
-
 
         var response = await _client.GetChatCompletionsAsync(_options.ModelName, _chatCompletionsOptions);
 

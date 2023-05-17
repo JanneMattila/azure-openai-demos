@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using WebApp.Models;
 using WebApp.Services;
 
@@ -10,11 +11,19 @@ public class ChatController : ControllerBase
 {
     private readonly ILogger _logger;
     private readonly IChatService _chatService;
+    private readonly ChatPromptOptions _options;
 
-    public ChatController(ILoggerFactory loggerFactory, IChatService chatService)
+    public ChatController(ILoggerFactory loggerFactory, IChatService chatService, IOptions<ChatPromptOptions> options)
     {
         _logger = loggerFactory.CreateLogger<ChatController>();
         _chatService = chatService;
+        _options = options.Value;
+    }
+
+    [HttpGet]
+    public IActionResult Get()
+    {
+        return Ok(_options);
     }
 
     [HttpPost]

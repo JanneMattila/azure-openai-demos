@@ -6,6 +6,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 
+builder.Services.AddOptions<ChatPromptOptions>()
+    .Configure<IConfiguration>((settings, configuration) =>
+    {
+        configuration.GetSection("ChatPrompt").Bind(settings);
+    });
+
 builder.Services.AddOptions<ChatOptions>()
     .Configure<IConfiguration>((settings, configuration) =>
     {
