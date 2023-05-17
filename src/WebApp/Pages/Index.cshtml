@@ -1,10 +1,42 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Chat";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center" id="chatArea">
+
+    <div class="input-group mb-3">
+        <input type="text" id="chatInput" class="form-control" placeholder="Type your query here" aria-label="Type your query here" aria-describedby="basic-addon2">
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" id="chatInputSubmit">Send</button>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        let chatInput = document.getElementById("chatInput");
+        let chatInputSubmit = document.getElementById("chatInputSubmit");
+        chatInput.addEventListener("keyup", function (event) {
+            event.preventDefault();
+            if (event.keyCode === 13) {
+                chatInputSubmit.click();
+            }
+        });
+        chatInputSubmit.addEventListener("click", function (event) {
+            event.preventDefault();
+            let chatText = chatInput.value;
+            if (chatInput != "") {
+                let chatArea = document.getElementById("chatArea");
+                let chatBubble = document.createElement("div");
+                chatBubble.className = "chatBubble";
+                chatBubble.innerHTML = chatText;
+                chatArea.appendChild(chatBubble);
+                chatInput.value = "";
+            }
+        });
+
+        chatInput.focus();
+    </script>
+}

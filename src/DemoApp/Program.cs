@@ -50,11 +50,11 @@ var prompt =
 var completionOptions = new CompletionsOptions
 {
     Prompts = { prompt },
-    MaxTokens = 100,
-    Temperature = 0f,
+    MaxTokens = 800,
+    Temperature = 0.7f,
     FrequencyPenalty = 0.0f,
     PresencePenalty = 0.0f,
-    NucleusSamplingFactor = 1 // Top P
+    NucleusSamplingFactor = 0.95f // Top P
 };
 
 var response = await openAIClient.GetCompletionsAsync(modelName, completionOptions);
