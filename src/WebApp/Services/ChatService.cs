@@ -62,12 +62,18 @@ public class ChatService : IChatService
 
         while (_chatCompletionsOptions.Messages.Count > 20) _chatCompletionsOptions.Messages.RemoveAt(0);
 
-        _chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, text));
+        if (string.IsNullOrEmpty(text))
+        {
+            return string.Empty;
+        }
+        else
+        {
+            _chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, text));
+            var response = await _client.GetChatCompletionsAsync(_options.ModelName, _chatCompletionsOptions);
 
-        var response = await _client.GetChatCompletionsAsync(_options.ModelName, _chatCompletionsOptions);
-
-        var chatResponse = response.Value.Choices.First().Message.Content;
-        _chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.Assistant, chatResponse));
-        return chatResponse;
+            var chatResponse = response.Value.Choices.First().Message.Content;
+            _chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.Assistant, chatResponse));
+            return chatResponse;
+        }
     }
 }

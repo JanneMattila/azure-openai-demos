@@ -26,6 +26,7 @@
         let chatInputSubmit = document.getElementById("chatInputSubmit");
 
         const createChatBubble = (text, type) => {
+            if (text.length === 0) return null;
             let chatBubble = document.createElement("div");
             chatBubble.classList.add("chatBubble");
             chatBubble.classList.add(type);
@@ -46,7 +47,7 @@
         chatInputSubmit.addEventListener("click", function (event) {
             event.preventDefault();
             let chatText = chatInput.value;
-            if (chatInput != "") {
+            if (chatInput !== "") {
                 createChatBubble(chatText, "chatBubbleUser");
                 charBubbleToRemove = createChatBubble("...", "chatBubbleAI");
                 const json = {
@@ -95,6 +96,7 @@
                     promptButton.onclick = () => {
                         chatInput.value = "";
                         chatHistory.textContent = "";
+                        chatInput.focus();
 
                         if (prompt.userMessage.length > 0) {
                             createChatBubble(prompt.userMessage, "chatBubbleUser");
