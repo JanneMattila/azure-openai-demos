@@ -35,4 +35,18 @@ public class ChatController : ControllerBase
             Text = response
         });
     }
+
+    [HttpPut("{index:int}")]
+    public async Task<IActionResult> Put(int index)
+    {
+        if (index < 0 || _options.Prompts.Count - 1 < index)
+        {
+            return BadRequest();
+        }
+        var response = await _chatService.SetPrompt(_options.Prompts[index]);
+        return Ok(new ChatModel()
+        {
+            Text = response
+        });
+    }
 }

@@ -8,16 +8,28 @@ body {
     height: 100%
 }
 
+.chatPrompts {
+    height: 50px;
+    width: 100%;
+    position: relative;
+    left: 0;
+    top: 0;
+    padding-left: 24px;
+    padding-right: 24px;
+    background: #adadad;
+}
+
 .chatHistory {
     position: relative;
+    top: 30px;
     /* Firefox */
-    min-height: -moz-calc(100% - 50px);
+    min-height: -moz-calc(100% - 100px);
     /* WebKit */
-    min-height: -webkit-calc(100% - 50px);
+    min-height: -webkit-calc(100% - 100px);
     /* Opera */
-    min-height: -o-calc(100% - 50px);
+    min-height: -o-calc(100% - 100px);
     /* Standard */
-    min-height: calc(100% - 50px);
+    min-height: calc(100% - 100px);
 }
 
 .chatInputContainer {

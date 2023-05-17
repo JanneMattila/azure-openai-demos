@@ -4,6 +4,9 @@
     ViewData["Title"] = "Chat";
 }
 
+<div class="chatPrompts" id="chatPrompts">
+</div>
+
 <div class="chatHistory" id="chatHistory"></div>
 
 <div class="input-group mb-3 chatInputContainer" id="chatInputWrapper">
@@ -16,10 +19,11 @@
 @section Scripts {
     <script>
         let charBubbleToRemove = null;
-        let chatInput = document.getElementById("chatInput");
-        let chatInputWrapper = document.getElementById("chatInputWrapper");
-        let chatInputSubmit = document.getElementById("chatInputSubmit");
+        let chatPrompts = document.getElementById("chatPrompts");
         let chatHistory = document.getElementById("chatHistory");
+        let chatInputWrapper = document.getElementById("chatInputWrapper");
+        let chatInput = document.getElementById("chatInput");
+        let chatInputSubmit = document.getElementById("chatInputSubmit");
 
         const createChatBubble = (text, type) => {
             let chatBubble = document.createElement("div");
@@ -80,6 +84,42 @@
             })
             .then(data => {
                 console.log(data);
+                for (let i = 0; i < data.prompts.length; i++) {
+                    const prompt = data.prompts[i];
+                    let promptButton = document.createElement("button");
+                    promptButton.classList.add("btn");
+                    promptButton.classList.add("btn-light");
+                    promptButton.innerText = prompt.title;
+                    promptButton.onclick = () => {
+                        chatInput.value = "";
+                        chatHistory.textContent = "";
+
+                        if (prompt.userMessage.length > 0) {
+                            createChatBubble(prompt.userMessage, "chatBubbleUser");
+                        }
+                        charBubbleToRemove = createChatBubble("...", "chatBubbleAI");
+
+                        fetch("/api/chat/" + i,
+                            {
+                                method: "PUT"
+                            })
+                            .then(response => {
+                                return response.json();
+                            })
+                            .then(data => {
+                                chatHistory.removeChild(charBubbleToRemove);
+                                charBubbleToRemove = null;
+                                createChatBubble(data.text, "chatBubbleAI");
+                            })
+                            .catch(error => {
+                                console.log(error);
+                                chatHistory.removeChild(charBubbleToRemove);
+                                charBubbleToRemove = null;
+                                createChatBubble(error, "chatBubbleError");
+                            });
+                    }
+                    chatPrompts.appendChild(promptButton);
+                }
             })
             .catch(error => {
                 console.log(error);

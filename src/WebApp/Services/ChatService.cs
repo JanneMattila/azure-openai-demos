@@ -1,4 +1,5 @@
-﻿using Azure.AI.OpenAI;
+﻿using Azure;
+using Azure.AI.OpenAI;
 using Azure.Identity;
 using Microsoft.Extensions.Options;
 using WebApp.Models;
@@ -18,7 +19,14 @@ public class ChatService : IChatService
         _logger = loggerFactory.CreateLogger<ChatService>();
         _options = options.Value;
 
-        _client = new OpenAIClient(new Uri(_options.Endpoint), new DefaultAzureCredential());
+        if (string.IsNullOrEmpty(_options.Key))
+        {
+            _client = new OpenAIClient(new Uri(_options.Endpoint), new DefaultAzureCredential());
+        }
+        else
+        {
+            _client = new OpenAIClient(new Uri(_options.Endpoint), new AzureKeyCredential(_options.Key));
+        }
 
         _chatCompletionsOptions = new ChatCompletionsOptions
         {
@@ -33,7 +41,7 @@ public class ChatService : IChatService
         _chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System, _options.Prompt));
     }
 
-    public void SetPrompt(Prompt prompt)
+    public async Task<string> SetPrompt(Prompt prompt)
     {
         _chatCompletionsOptions.Messages.Clear();
 
@@ -42,10 +50,7 @@ public class ChatService : IChatService
             _chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System, prompt.SystemMessage));
         }
 
-        if (!string.IsNullOrEmpty(prompt.UserMessage))
-        {
-            _chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, prompt.UserMessage));
-        }
+        return await GetResponseAsync(prompt.UserMessage);
     }
 
     public async Task<string> GetResponseAsync(string text)
