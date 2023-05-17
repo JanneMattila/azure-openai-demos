@@ -39,9 +39,15 @@ body {
 }
 
 .chatBubbleAI {
-    /*float: right;*/
     margin-left: auto;
     background: #a2fb7c;
     text-align: right;
     color: black;
+}
+
+.chatBubbleError {
+    margin-left: auto;
+    background: red;
+    text-align: center;
+    color: white;
 }

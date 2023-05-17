@@ -39,7 +39,28 @@
             let chatText = chatInput.value;
             if (chatInput != "") {
                 createChatBubble(chatText, "chatBubbleUser");
-                createChatBubble("response", "chatBubbleAI");
+
+                const json = {
+                    "text": chatText,
+                };
+                fetch("/api/chat",
+                    {
+                        method: "POST",
+                        body: JSON.stringify(json),
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    })
+                    .then(response => {
+                        return response.json();
+                    })
+                    .then(data => {
+                        createChatBubble(data.text, "chatBubbleAI");
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        createChatBubble(error, "chatBubbleError");
+                    });
                 chatInput.value = "";
             }
         });
