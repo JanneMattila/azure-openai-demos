@@ -1,6 +1,7 @@
 html {
     height: 100%;
     margin: 0;
+    font-size: 20px;
 }
 
 body {
@@ -13,7 +14,7 @@ body {
     position: relative;
 }
 
-.chatInput {
+.chatInputContainer {
     position: absolute;
     bottom: 0;
     padding-top: 12px;
@@ -25,10 +26,22 @@ body {
 .chatBubble {
     padding: 12px;
     margin-left: 12px;
+    margin-right: 12px;
     margin-bottom: 12px;
     border-radius: 12px;
-    background: #258cfb;
     color: white;
     max-width: 80%;
+}
+
+.chatBubbleUser {
+    background: #4682ff;
     text-align: left;
+}
+
+.chatBubbleAI {
+    /*float: right;*/
+    margin-left: auto;
+    background: #a2fb7c;
+    text-align: right;
+    color: black;
 }
