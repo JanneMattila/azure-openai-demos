@@ -1,6 +1,7 @@
 ﻿using Azure;
 using Azure.AI.OpenAI;
 using Azure.Identity;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using WebApp.Models;
 
@@ -11,7 +12,10 @@ public class ChatService : IChatService
     private readonly ILogger _logger;
     private readonly ChatOptions _options;
     private readonly OpenAIClient _client;
-    private ChatCompletionsOptions _chatCompletionsOptions;
+    private readonly MemoryCache _users = new(new MemoryCacheOptions()
+    {
+        ExpirationScanFrequency = TimeSpan.FromMinutes(10)
+    });
 
     public ChatService(ILoggerFactory loggerFactory, IOptions<ChatOptions> options)
     {
@@ -26,33 +30,48 @@ public class ChatService : IChatService
         {
             _client = new OpenAIClient(new Uri(_options.Endpoint), new AzureKeyCredential(_options.Key));
         }
-
-        _chatCompletionsOptions = new ChatCompletionsOptions
-        {
-            ChoicesPerPrompt = 1,
-            MaxTokens = 800,
-            Temperature = 0.7f,
-            FrequencyPenalty = 0.0f,
-            PresencePenalty = 0.0f,
-            NucleusSamplingFactor = 0.95f // Top P
-        };
-
-        _chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System, _options.Prompt));
     }
 
-    public async Task<string> SetPrompt(Prompt prompt)
+    private ChatCompletionsOptions GetUserChatCompletionsOptions(string userID)
     {
-        _chatCompletionsOptions.Messages.Clear();
+        if (_users.TryGetValue<ChatCompletionsOptions>(userID, out var chatCompletionsOptions))
+        {
+            return chatCompletionsOptions;
+        }
+        else
+        {
+            chatCompletionsOptions = new ChatCompletionsOptions
+            {
+                ChoicesPerPrompt = 1,
+                MaxTokens = 800,
+                Temperature = 0.7f,
+                FrequencyPenalty = 0.0f,
+                PresencePenalty = 0.0f,
+                NucleusSamplingFactor = 0.95f // Top P
+            };
+            chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System, _options.Prompt));
+
+            var cacheEntryOptions = new MemoryCacheEntryOptions()
+                .SetSlidingExpiration(TimeSpan.FromHours(1));
+            _users.Set(userID, chatCompletionsOptions, cacheEntryOptions);
+            return chatCompletionsOptions;
+        }
+    }
+
+    public async Task<string> SetPrompt(string userID, Prompt prompt)
+    {
+        var chatCompletionsOptions = GetUserChatCompletionsOptions(userID);
+        chatCompletionsOptions.Messages.Clear();
 
         if (!string.IsNullOrEmpty(prompt.SystemMessage))
         {
-            _chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System, prompt.SystemMessage));
+            chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.System, prompt.SystemMessage));
         }
 
-        return await GetResponseAsync(prompt.UserMessage);
+        return await GetResponseAsync(userID, prompt.UserMessage);
     }
 
-    public async Task<string> GetResponseAsync(string text)
+    public async Task<string> GetResponseAsync(string userID, string text)
     {
         if (_options.Disabled)
         {
@@ -60,7 +79,8 @@ public class ChatService : IChatService
             return $"Automated response to: {text}";
         }
 
-        while (_chatCompletionsOptions.Messages.Count > 20) _chatCompletionsOptions.Messages.RemoveAt(0);
+        var chatCompletionsOptions = GetUserChatCompletionsOptions(userID);
+        while (chatCompletionsOptions.Messages.Count > 20) chatCompletionsOptions.Messages.RemoveAt(0);
 
         if (string.IsNullOrEmpty(text))
         {
@@ -68,11 +88,11 @@ public class ChatService : IChatService
         }
         else
         {
-            _chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, text));
-            var response = await _client.GetChatCompletionsAsync(_options.ModelName, _chatCompletionsOptions);
+            chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.User, text));
+            var response = await _client.GetChatCompletionsAsync(_options.ModelName, chatCompletionsOptions);
 
             var chatResponse = response.Value.Choices.First().Message.Content;
-            _chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.Assistant, chatResponse));
+            chatCompletionsOptions.Messages.Add(new ChatMessage(ChatRole.Assistant, chatResponse));
             return chatResponse;
         }
     }

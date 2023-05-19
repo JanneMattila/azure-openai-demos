@@ -29,21 +29,21 @@ public class ChatController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] ChatModel request)
     {
-        var response = await _chatService.GetResponseAsync(request.Text);
+        var response = await _chatService.GetResponseAsync(request.User, request.Text);
         return Ok(new ChatModel()
         {
             Text = response
         });
     }
 
-    [HttpPut("{index:int}")]
-    public async Task<IActionResult> Put(int index)
+    [HttpPut]
+    public async Task<IActionResult> Put([FromBody] ChatOptionModel request)
     {
-        if (index < 0 || _options.Prompts.Count - 1 < index)
+        if (request.Option < 0 || _options.Prompts.Count - 1 < request.Option)
         {
             return BadRequest();
         }
-        var response = await _chatService.SetPrompt(_options.Prompts[index]);
+        var response = await _chatService.SetPrompt(request.User, _options.Prompts[request.Option]);
         return Ok(new ChatModel()
         {
             Text = response

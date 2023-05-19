@@ -4,8 +4,8 @@ namespace WebApp.Services
 {
     public interface IChatService
     {
-        Task<string> SetPrompt(Prompt prompt);
+        Task<string> SetPrompt(string userID, Prompt prompt);
 
-        Task<string> GetResponseAsync(string text);
+        Task<string> GetResponseAsync(string userID, string text);
     }
 }

@@ -18,6 +18,17 @@
 
 @section Scripts {
     <script>
+        const generateId = () => {
+            try {
+                const random = window.crypto.getRandomValues(new Uint32Array(4));
+                return random[0].toString(16) + "-" + random[1].toString(16) + "-" + random[2].toString(16) + "-" + random[3].toString(16);
+            } catch (e) {
+                console.log("Secure random number generation is not supported.");
+                return Math.floor(Math.random() * 10000000000).toString();
+            }
+        }
+
+        const userId = generateId();
         let charBubbleToRemove = null;
         let chatPrompts = document.getElementById("chatPrompts");
         let chatHistory = document.getElementById("chatHistory");
@@ -52,6 +63,7 @@
                 charBubbleToRemove = createChatBubble("...", "chatBubbleAI");
                 const json = {
                     "text": chatText,
+                    "user": userId
                 };
                 fetch("/api/chat",
                     {
@@ -103,9 +115,18 @@
                         }
                         charBubbleToRemove = createChatBubble("...", "chatBubbleAI");
 
-                        fetch("/api/chat/" + i,
+                        const json = {
+                            "option": i,
+                            "user": userId
+                        };
+
+                        fetch("/api/chat",
                             {
-                                method: "PUT"
+                                method: "PUT",
+                                body: JSON.stringify(json),
+                                headers: {
+                                    "Content-Type": "application/json"
+                                }
                             })
                             .then(response => {
                                 return response.json();
